@@ -1,0 +1,84 @@
+version: "3.9"
+
+# Agent Credential Sandbox - Local Development Stack
+#
+# Usage:
+#   docker compose up -d proxy    # Start proxy only
+#   docker compose up -d          # Start full stack (proxy + mock services)
+#   docker compose down           # Stop everything
+
+networks:
+  agent-sandbox-internal:
+    driver: bridge
+    internal: true  # No internet access for sandbox
+
+services:
+  # ── Mock API Server (for local testing) ────────────────────────────────
+  mock-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-api
+    ports:
+      - "8080:8080"
+    networks:
+      - agent-sandbox-internal
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Credential Proxy ───────────────────────────────────────────────────
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    container_name: credential-proxy
+    ports:
+      - "127.0.0.1:9199:9199"
+    volumes:
+      - ./.env:/creds/.env:ro
+      - ./proxy/whitelist.json:/app/whitelist.json:ro
+    environment:
+      # Override target URLs to point to mock services
+      JIRA_URL: http://mock-api:8080/jira
+      API_URL: http://mock-api:8080/api
+      GRAPH_URL: http://mock-api:8080/graph
+      S3_URL: http://minio:9000
+    networks:
+      - agent-sandbox-internal
+    depends_on:
+      mock-api:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9199/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── MinIO (S3-compatible storage for testing) ─────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: testkey
+      MINIO_ROOT_PASSWORD: testsecret12345678
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - agent-sandbox-internal
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  minio-data:

@@ -1,0 +1,68 @@
+{
+  "routes": [
+    {
+      "prefix": "/jira",
+      "target_env": "JIRA_URL",
+      "target_default": "https://your-company.atlassian.net",
+      "auth_type": "bearer",
+      "cred_env": "JIRA_TOKEN",
+      "strip_prefix": true,
+      "rate_limit": { "rate": 10, "burst": 20 }
+    },
+    {
+      "prefix": "/jenkins",
+      "auth_type": "basic",
+      "cred_env_user": "JENKINS_USER",
+      "cred_env_pass": "JENKINS_TOKEN",
+      "use_x_sandbox_target": true,
+      "strip_prefix": true,
+      "target_patterns": [
+        "^https?://jenkins\\.your-company\\.com/",
+        "^https?://ci\\.internal\\.corp/",
+        "^https?://localhost:\\d+/",
+        "^https?://127\\.0\\.0\\.1:\\d+/"
+      ],
+      "rate_limit": { "rate": 5, "burst": 10 }
+    },
+    {
+      "prefix": "/api",
+      "target_env": "API_URL",
+      "target_default": "https://api.your-company.com",
+      "auth_type": "apikey",
+      "cred_env": "API_KEY",
+      "apikey_header": "X-API-Key",
+      "strip_prefix": true,
+      "rate_limit": { "rate": 20, "burst": 40 }
+    },
+    {
+      "prefix": "/s3",
+      "target_env": "S3_URL",
+      "target_default": "http://localhost:9000",
+      "auth_type": "sigv4",
+      "cred_env_key": "S3_ACCESS_KEY",
+      "cred_env_secret": "S3_SECRET_KEY",
+      "sigv4_region": "us-east-1",
+      "sigv4_service": "s3",
+      "strip_prefix": true,
+      "rate_limit": { "rate": 10, "burst": 20 }
+    },
+    {
+      "prefix": "/graph",
+      "target_env": "GRAPH_URL",
+      "target_default": "https://graph.microsoft.com",
+      "auth_type": "bearer",
+      "cred_env": "MICROSOFT_TOKEN",
+      "strip_prefix": true,
+      "rate_limit": { "rate": 5, "burst": 10 }
+    }
+  ],
+
+  "skill_permissions": {
+    "jira-skill": ["/jira"],
+    "jenkins-skill": ["/jenkins"],
+    "api-skill": ["/api"],
+    "s3-skill": ["/s3"],
+    "graph-skill": ["/graph"],
+    "admin-skill": ["/jira", "/jenkins", "/api", "/s3", "/graph"]
+  }
+}

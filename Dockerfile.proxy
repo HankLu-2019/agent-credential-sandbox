@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copy proxy code (only stdlib - no pip install needed!)
+COPY proxy/credential_proxy.py /app/
+COPY proxy/whitelist.json /app/
+
+# No additional dependencies - uses only Python stdlib!
+
+CMD ["python3", "credential_proxy.py", "--host", "0.0.0.0", "--port", "9199", \
+     "--whitelist", "/app/whitelist.json", "--kiroenv", "/creds/.env"]
