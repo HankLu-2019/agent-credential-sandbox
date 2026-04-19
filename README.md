@@ -59,6 +59,23 @@ Skills run in hardened Docker containers with **dummy credentials**. A host-side
 | Filesystem escape | ✅ Read-only FS, non-root user |
 | DNS exfiltration | ⚠️ Known limitation (see docs) |
 
+## Comparison with Similar Projects
+
+| Feature | This Project | [vigilante](https://github.com/aliengiraffe/vigilante) | [botbox](https://github.com/reoring/botbox) |
+|---------|--------------|--------------------------------------------------------|---------------------------------------------|
+| **Architecture** | Docker + HTTP proxy | Git worktree isolation | Kubernetes sidecar + iptables |
+| **Credential handling** | Proxy injects real creds | Credential scoping | iptables-based injection |
+| **Dependencies** | Python stdlib only (zero!) | Go (several deps) | Rust + Kubernetes |
+| **Use case** | General AI agents | Coding agents | Kubernetes deployments |
+| **Complexity** | Simple (~500 LOC) | More complex | Requires K8s |
+
+### Why This Approach?
+
+1. **Zero external dependencies** — The proxy uses only Python stdlib, eliminating supply-chain risk for the security-critical component
+2. **Transparent to skills** — No code changes needed in agent skills
+3. **Simple deployment** — Just Docker, no Kubernetes required
+4. **Flexible** — Works with any HTTP-based API
+
 ## Quick Start
 
 ```bash
