@@ -79,9 +79,8 @@ docker compose up -d proxy
 
 ## Documentation
 
-- [Paper](./PAPER.md) — Full academic paper describing the architecture
-- [Architecture](./docs/architecture.md) — Deep dive into the design
-- [API Reference](./docs/api.md) — Whitelist configuration reference
+- [SETUP.md](./SETUP.md) — Step-by-step setup guide
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — How to contribute and push to GitHub
 - [Examples](./examples/) — Ready-to-run example skills
 
 ## Requirements
